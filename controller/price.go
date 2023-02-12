@@ -4,6 +4,7 @@ import (
 	"chaos/backend/database"
 	"chaos/backend/database/model"
 	"chaos/backend/service"
+	"chaos/backend/utility"
 	"net/http"
 	"time"
 
@@ -72,8 +73,8 @@ func GetPriceByLatest(w http.ResponseWriter, r *http.Request) {
 // get price by time
 // Authorization: apikey
 func GetPriceByTime(w http.ResponseWriter, r *http.Request) {
-	date := chi.URLParam(r, "date")
-	if date == "" {
+	datetime := chi.URLParam(r, "time")
+	if datetime == "" {
 		ErrorResp(w, r, http.StatusBadRequest, &MissingDateError{})
 		return
 	}
@@ -84,22 +85,49 @@ func GetPriceByTime(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	requestedDate, err := time.Parse(time.RFC3339, date)
+	requestedTime, err := time.Parse(time.RFC3339, datetime)
 	if err != nil {
 		ErrorResp(w, r, http.StatusBadRequest, err)
 		return
 	}
 
-	var price model.Price
-	price.PairId = pricePair.ID
-	price.CreatedAt = requestedDate
-	if err := price.FindByDate(database.Connection); err != nil {
+	var previousPrice model.Price
+	previousPrice.PairId = pricePair.ID
+	previousPrice.CreatedAt = requestedTime
+
+	var nextPrice model.Price
+	nextPrice.PairId = pricePair.ID
+	nextPrice.CreatedAt = requestedTime
+
+	if err := previousPrice.FindPreviousByTime(database.Connection); err != nil {
+		if utility.RecordNotFound(err) {
+			ErrorResp(w, r, http.StatusNotFound, err)
+			return
+		}
 		ErrorResp(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
+	if err := nextPrice.FindNextByTime(database.Connection); err != nil {
+		if utility.RecordNotFound(err) {
+			ErrorResp(w, r, http.StatusNotFound, err)
+			return
+		}
+		ErrorResp(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	diff_mid := requestedTime.Sub(previousPrice.CreatedAt)
+	diff_whole := nextPrice.CreatedAt.Sub(previousPrice.CreatedAt)
+
+	ratio := diff_mid.Seconds() / diff_whole.Seconds()
+
+	diff_value := nextPrice.Value - previousPrice.Value
+	add_value := diff_value * ratio
+	between := add_value + previousPrice.Value
+
 	result := PriceResultRespond{
-		USD: price.Value,
+		USD: between,
 	}
 
 	JSON(w, r, 200, &result)
@@ -120,13 +148,13 @@ func GetAverageByRange(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	startDate, err := time.Parse(time.RFC3339, start)
+	startTime, err := time.Parse(time.RFC3339, start)
 	if err != nil {
 		ErrorResp(w, r, http.StatusBadRequest, err)
 		return
 	}
 
-	endDate, err := time.Parse(time.RFC3339, end)
+	endTime, err := time.Parse(time.RFC3339, end)
 	if err != nil {
 		ErrorResp(w, r, http.StatusBadRequest, err)
 		return
@@ -138,7 +166,7 @@ func GetAverageByRange(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	priceList, err := service.GetPriceList(database.Connection, *pricePair, startDate, endDate)
+	priceList, err := service.GetPriceList(database.Connection, *pricePair, startTime, endTime)
 	if err != nil {
 		ErrorResp(w, r, http.StatusInternalServerError, err)
 		return

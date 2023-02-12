@@ -24,7 +24,7 @@ func GenerateRandomPriceList(num int) ([]model.Price, error) {
 		return priceList, err
 	}
 
-	now := time.Now()
+	now := time.Now().Truncate(time.Second)
 	current := now.Add(-time.Minute * time.Duration(num+1))
 	for i := 0; i < num; i++ {
 		value := GenerateRandomPrice(21500, 22000)

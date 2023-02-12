@@ -34,9 +34,18 @@ func (p *Price) FindByLatest(db *gorm.DB) error {
 	return nil
 }
 
-func (p *Price) FindByDate(db *gorm.DB) error {
+func (p *Price) FindPreviousByTime(db *gorm.DB) error {
 	base := p.QueryByPair(db)
-	if err := base.Where("created_at > ?", p.CreatedAt.Format(time.RFC3339)).First(p).Error; err != nil {
+	if err := base.Where("created_at <= ?", p.CreatedAt.Format(time.RFC3339)).Last(p).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *Price) FindNextByTime(db *gorm.DB) error {
+	base := p.QueryByPair(db)
+	if err := base.Where("created_at >= ?", p.CreatedAt.Format(time.RFC3339)).First(p).Error; err != nil {
 		return err
 	}
 

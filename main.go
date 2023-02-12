@@ -86,7 +86,7 @@ func getServer() *chi.Mux {
 	router.Route("/price", func(r chi.Router) {
 		r.With(middleware.APIMiddleware()).Route("/", func(r chi.Router) {
 			r.Get("/last", controller.GetPriceByLatest)
-			r.Get("/bydate/{date}", controller.GetPriceByTime)
+			r.Get("/bytime/{time}", controller.GetPriceByTime)
 			r.Get("/range/{start}/{end}", controller.GetAverageByRange)
 		})
 	})

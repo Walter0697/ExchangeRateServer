@@ -1,0 +1,16 @@
+[app]
+environment="development"
+port="3030"
+jwtkey="jwtexample"
+allowedorigin="http://*"
+
+[database]
+host=""
+port="5432"
+dbname="chaostheory"
+username=""
+password=""
+
+[default]
+adminusername="admin"
+adminpassword="chaos"

@@ -47,6 +47,10 @@ func AutoMigration() {
 }
 
 func Refresh() {
+	if config.Data.App.Environment == "production" {
+		// prevent database from accidentally deleted in production
+		return
+	}
 	Connection.Migrator().DropTable(&model.User{})
 	Connection.Migrator().DropTable(&model.APIKey{})
 	Connection.Migrator().DropTable(&model.PricePair{})

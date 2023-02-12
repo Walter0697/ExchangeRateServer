@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/carlescere/scheduler"
 	"github.com/go-chi/chi"
@@ -88,6 +89,13 @@ func getServer() *chi.Mux {
 			r.Get("/bydate/{date}", controller.GetPriceByTime)
 			r.Get("/range/{start}/{end}", controller.GetAverageByRange)
 		})
+	})
+
+	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		result := controller.BasicRespond{
+			Message: "Server running, current time is " + time.Now().Format(time.RFC3339),
+		}
+		controller.JSON(w, r, 200, &result)
 	})
 
 	return router

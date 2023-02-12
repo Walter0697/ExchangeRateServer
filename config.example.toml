@@ -1,6 +1,6 @@
 [app]
 environment="development"
-port="3030"
+port="80"
 jwtkey="jwtexample"
 allowedorigin="http://*"
 

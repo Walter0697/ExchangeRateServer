@@ -10,6 +10,11 @@ type BaseRespond struct {
 	Elapsed int64 `json:"-"`
 }
 
+type BasicRespond struct {
+	BaseRespond
+	Message string `json:"message"`
+}
+
 func (br *BaseRespond) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }

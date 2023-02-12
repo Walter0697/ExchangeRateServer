@@ -91,6 +91,13 @@ func getServer() *chi.Mux {
 		})
 	})
 
+	// setting controller
+	router.Route("/setting", func(r chi.Router) {
+		r.With(middleware.AuthMiddleware()).Route("/", func(r chi.Router) {
+			r.Post("/fetch_enable", controller.EnableFetch)
+		})
+	})
+
 	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		result := controller.BasicRespond{
 			Message: "Server running, current time is " + time.Now().Format(time.RFC3339),

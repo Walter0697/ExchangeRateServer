@@ -44,6 +44,7 @@ func AutoMigration() {
 	Connection.AutoMigrate(&model.APIKey{})
 	Connection.AutoMigrate(&model.PricePair{})
 	Connection.AutoMigrate(&model.Price{})
+	Connection.AutoMigrate(&model.Setting{})
 }
 
 func Refresh() {
@@ -55,4 +56,5 @@ func Refresh() {
 	Connection.Migrator().DropTable(&model.APIKey{})
 	Connection.Migrator().DropTable(&model.PricePair{})
 	Connection.Migrator().DropTable(&model.Price{})
+	Connection.Migrator().DropTable(&model.Setting{})
 }

@@ -53,10 +53,10 @@ func (suite *APIPriceTestSuite) TestPriceTest() {
 
 	lastresBody, _ := ioutil.ReadAll(lastRecorder.Result().Body)
 	lastBody := gjson.ParseBytes(lastresBody)
-	usd_last := float64(lastBody.Get("usd").Float())
+	value_last := float64(lastBody.Get("value").Float())
 
 	lastPrice := list[total_number-1]
-	assert.Equal(suite.T(), lastPrice.Value, usd_last)
+	assert.Equal(suite.T(), lastPrice.Value, value_last)
 
 	// testing selected time api
 	middle_index := rand.Intn(total_number/2) + rand.Intn(total_number/10)
@@ -81,9 +81,9 @@ func (suite *APIPriceTestSuite) TestPriceTest() {
 
 	timeResBody, _ := ioutil.ReadAll(timeRecorder.Result().Body)
 	timeBody := gjson.ParseBytes(timeResBody)
-	usd_time := float64(timeBody.Get("usd").Float())
+	value_time := float64(timeBody.Get("value").Float())
 
-	assert.Equal(suite.T(), between, usd_time)
+	assert.Equal(suite.T(), between, value_time)
 
 	// testing range api
 	starting_index := rand.Intn(3)
@@ -101,7 +101,7 @@ func (suite *APIPriceTestSuite) TestPriceTest() {
 
 	resBody, _ := ioutil.ReadAll(rangerRecorder.Result().Body)
 	body := gjson.ParseBytes(resBody)
-	usd_average := float64(body.Get("usd").Float())
+	value_average := float64(body.Get("value").Float())
 
 	var sum float64 = 0
 	for i := starting_index; i <= ending_index; i++ {
@@ -109,7 +109,7 @@ func (suite *APIPriceTestSuite) TestPriceTest() {
 	}
 	average := sum / float64(ending_index-starting_index+1)
 
-	assert.Equal(suite.T(), average, usd_average)
+	assert.Equal(suite.T(), average, value_average)
 }
 
 func TestPrice(t *testing.T) {

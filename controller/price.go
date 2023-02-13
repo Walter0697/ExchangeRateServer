@@ -17,9 +17,34 @@ func (m *MissingDateError) Error() string {
 	return "missing requested date"
 }
 
+type PriceRespondObject struct {
+	Value float64   `json:"value"`
+	Time  time.Time `json:"time"`
+}
+
+// for /price/last
 type PriceResultRespond struct {
 	BaseRespond
-	USD float64 `json:"usd"`
+	Time  time.Time `json:"time"`
+	Value float64   `json:"value"`
+}
+
+// for /price/range
+type AverageResultRespond struct {
+	BaseRespond
+	List  []PriceRespondObject `json:"list"`
+	Value float64              `json:"value"`
+}
+
+// for /price/selected
+type SelectedReferenceRespond struct {
+	Previous PriceRespondObject `json:"previous"`
+	Upcoming PriceRespondObject `json:"upcoming"`
+}
+type SelectedResultRespond struct {
+	BaseRespond
+	Reference SelectedReferenceRespond `json:"reference"`
+	Value     float64                  `json:"value"`
 }
 
 // helper function for getting price pair
@@ -64,7 +89,8 @@ func GetPriceByLatest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	result := PriceResultRespond{
-		USD: price.Value,
+		Time:  price.CreatedAt,
+		Value: price.Value,
 	}
 
 	JSON(w, r, 200, &result)
@@ -126,8 +152,23 @@ func GetPriceByTime(w http.ResponseWriter, r *http.Request) {
 	add_value := diff_value * ratio
 	between := add_value + previousPrice.Value
 
-	result := PriceResultRespond{
-		USD: between,
+	// defining return object
+	previous := PriceRespondObject{
+		Value: previousPrice.Value,
+		Time:  previousPrice.CreatedAt,
+	}
+	upcoming := PriceRespondObject{
+		Value: nextPrice.Value,
+		Time:  nextPrice.CreatedAt,
+	}
+	reference := SelectedReferenceRespond{
+		Previous: previous,
+		Upcoming: upcoming,
+	}
+
+	result := SelectedResultRespond{
+		Reference: reference,
+		Value:     between,
 	}
 
 	JSON(w, r, 200, &result)
@@ -173,14 +214,21 @@ func GetAverageByRange(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var sum float64 = 0
+	var priceReturnList []PriceRespondObject
 	for _, price := range priceList {
 		sum += price.Value
+		priceObject := PriceRespondObject{
+			Value: price.Value,
+			Time:  price.CreatedAt,
+		}
+		priceReturnList = append(priceReturnList, priceObject)
 	}
 
 	average := sum / float64(len(priceList))
 
-	result := PriceResultRespond{
-		USD: float64(average),
+	result := AverageResultRespond{
+		List:  priceReturnList,
+		Value: float64(average),
 	}
 
 	JSON(w, r, 200, &result)

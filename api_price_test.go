@@ -39,13 +39,8 @@ func (suite *APIPriceTestSuite) TestPriceTest() {
 		assert.Equal(suite.T(), "", err.Error())
 	}
 
-	// getting apikey token
-	keyString := `{"identifier": "pricetest"}`
-	api_token := test.APIKeyTest(suite.Suite, suite.router, keyString)
-
 	// testing last api
 	lastRequest := httptest.NewRequest("GET", "/price/last", nil)
-	lastRequest.Header.Add("Authorization", api_token)
 
 	lastRecorder := httptest.NewRecorder()
 	suite.router.ServeHTTP(lastRecorder, lastRequest)
@@ -66,7 +61,6 @@ func (suite *APIPriceTestSuite) TestPriceTest() {
 	request_time_str := request_time.Format(time.RFC3339)
 
 	timeRequest := httptest.NewRequest("GET", "/price/bytime/"+request_time_str, nil)
-	timeRequest.Header.Add("Authorization", api_token)
 
 	timeRecorder := httptest.NewRecorder()
 	suite.router.ServeHTTP(timeRecorder, timeRequest)
@@ -93,7 +87,6 @@ func (suite *APIPriceTestSuite) TestPriceTest() {
 	end := list[ending_index].CreatedAt.Format(time.RFC3339)
 
 	rangeRequest := httptest.NewRequest("GET", "/price/range/"+start+"/"+end, nil)
-	rangeRequest.Header.Add("Authorization", api_token)
 
 	rangerRecorder := httptest.NewRecorder()
 	suite.router.ServeHTTP(rangerRecorder, rangeRequest)

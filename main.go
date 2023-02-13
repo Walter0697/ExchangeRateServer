@@ -83,12 +83,11 @@ func getServer() *chi.Mux {
 	})
 
 	// price controller
+	// publicly avaiable routes
 	router.Route("/price", func(r chi.Router) {
-		r.With(middleware.APIMiddleware()).Route("/", func(r chi.Router) {
-			r.Get("/last", controller.GetPriceByLatest)
-			r.Get("/bytime/{time}", controller.GetPriceByTime)
-			r.Get("/range/{start}/{end}", controller.GetAverageByRange)
-		})
+		r.Get("/last", controller.GetPriceByLatest)
+		r.Get("/bytime/{time}", controller.GetPriceByTime)
+		r.Get("/range/{start}/{end}", controller.GetAverageByRange)
 	})
 
 	// setting controller

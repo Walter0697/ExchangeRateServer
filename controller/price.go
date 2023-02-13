@@ -214,7 +214,7 @@ func GetAverageByRange(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var sum float64 = 0
-	var priceReturnList []PriceRespondObject
+	priceReturnList := []PriceRespondObject{}
 	for _, price := range priceList {
 		sum += price.Value
 		priceObject := PriceRespondObject{
@@ -224,7 +224,10 @@ func GetAverageByRange(w http.ResponseWriter, r *http.Request) {
 		priceReturnList = append(priceReturnList, priceObject)
 	}
 
-	average := sum / float64(len(priceList))
+	average := float64(0)
+	if len(priceList) != 0 {
+		average = sum / float64(len(priceList))
+	}
 
 	result := AverageResultRespond{
 		List:  priceReturnList,
